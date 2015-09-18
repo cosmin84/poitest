@@ -1,9 +1,11 @@
 package poitest;
 
+import java.util.List;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -19,12 +21,14 @@ import org.apache.poi.ss.usermodel.*;
 
 public class ReadExcel {
 	public static void main(String[] args) throws FileNotFoundException, IOException {
-		// Will contain cell name / value pair for input cells and output cells
+		// Will contain cell name / value pair for input cells			
 		Map<String, String> inputCellsMap = new HashMap<String, String>();
-		Map<String, String> outputCellsMap = new HashMap<String, String>();
+		
+		// Will contain cell name for output cells
+		List<String> outputCells = new ArrayList<String>();
 		
 		// Open the Excel file
-		FileInputStream file = new FileInputStream(new File(args[1]));
+		FileInputStream file = new FileInputStream(new File(args[0]));
 		
 		// Get the current workbook
 		HSSFWorkbook workbook = new HSSFWorkbook(file);
@@ -34,36 +38,47 @@ public class ReadExcel {
 		
 		// Get the input cells that need to be modified and
 		// store their name and value in the inputCellsMap
-		for (String element : args[3].split(";")) {
+		for (String element : args[1].split(";")) {
 			inputCellsMap.put(element.split("=")[0], element.split("=")[1]);
+		}
+		
+		// Get the output cells that will be accessed for resulting values
+		for (String element : args[2].split(";")) {
+			outputCells.add(element);			
 		}
 		
 		// Loop through the cells that need to be modified and 
 		// set the new value in the Excel document
-		Iterator<Entry<String,String>> iterator = inputCellsMap.entrySet().iterator();
-		while (iterator.hasNext()) {
-			Map.Entry<String,String> entry = (Map.Entry<String,String>) iterator.next();
+		Iterator<Entry<String,String>> inputIterator = inputCellsMap.entrySet().iterator();
+		while (inputIterator.hasNext()) {
+			Map.Entry<String,String> inputEntry = (Map.Entry<String,String>) inputIterator.next();
 
-			CellReference cellReferenceInput = new CellReference(entry.getKey());
+			CellReference cellReferenceInput = new CellReference(inputEntry.getKey());
 			int cellReferenceInputRow = cellReferenceInput.getRow();
 			int cellReferenceInputColumn = cellReferenceInput.getCol();
 
 			Row rowInput = sheet.getRow(cellReferenceInputRow);
 			if (rowInput == null)
 			    rowInput = sheet.createRow(cellReferenceInputRow);
-			Cell cell = rowInput.getCell(cellReferenceInputColumn, Row.CREATE_NULL_AS_BLANK);				
-			cell.setCellValue(Integer.parseInt(entry.getValue()));		
+			Cell cellInput = rowInput.getCell(cellReferenceInputColumn, Row.CREATE_NULL_AS_BLANK);				
+			cellInput.setCellValue(Integer.parseInt(inputEntry.getValue()));		
 		}
 					
 		// Apply all formulas after altering cell values
 		HSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
-
-		// Get result
-		// This is currently hard coded
-		// Will have to get results from the cells entered as args
-		Cell resultCell = sheet.getRow(6).getCell(1);				
-
-		System.out.println(resultCell.getNumericCellValue());	
+		
+		// Get the results from the output cells
+		for (int i = 0; i < outputCells.size(); i++) {
+			CellReference cellReferenceOutput = new CellReference(outputCells.get(i));
+			int cellReferenceOutputRow = cellReferenceOutput.getRow();
+			int cellReferenceOutputColumn = cellReferenceOutput.getCol();
+			
+			Row rowOutput = sheet.getRow(cellReferenceOutputRow);
+			Cell cellOutput = rowOutput.getCell(cellReferenceOutputColumn, Row.CREATE_NULL_AS_BLANK);
+			
+			// Display results
+			System.out.println(cellOutput.getNumericCellValue());						
+		}			
 						
 		workbook.close();		
 	}
