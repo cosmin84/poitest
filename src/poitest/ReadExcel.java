@@ -44,14 +44,14 @@ public class ReadExcel {
 		while (iterator.hasNext()) {
 			Map.Entry<String,String> entry = (Map.Entry<String,String>) iterator.next();
 
-			CellReference cr = new CellReference(entry.getKey());
-			int r = cr.getRow();
-			int c = cr.getCol();
+			CellReference cellReferenceInput = new CellReference(entry.getKey());
+			int cellReferenceInputRow = cellReferenceInput.getRow();
+			int cellReferenceInputColumn = cellReferenceInput.getCol();
 
-			Row row = sheet.getRow(r);
-			if (row == null)
-			    row = sheet.createRow(r);
-			Cell cell = row.getCell(c, Row.CREATE_NULL_AS_BLANK);				
+			Row rowInput = sheet.getRow(cellReferenceInputRow);
+			if (rowInput == null)
+			    rowInput = sheet.createRow(cellReferenceInputRow);
+			Cell cell = rowInput.getCell(cellReferenceInputColumn, Row.CREATE_NULL_AS_BLANK);				
 			cell.setCellValue(Integer.parseInt(entry.getValue()));		
 		}
 					
@@ -61,9 +61,7 @@ public class ReadExcel {
 		// Get result
 		// This is currently hard coded
 		// Will have to get results from the cells entered as args
-		Cell resultCell = sheet.getRow(6).getCell(1);
-		
-		Cell someCell = sheet.getRow(3).getCell(1);
+		Cell resultCell = sheet.getRow(6).getCell(1);				
 
 		System.out.println(resultCell.getNumericCellValue());	
 						
