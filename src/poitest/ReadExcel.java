@@ -31,10 +31,7 @@ public class ReadExcel {
 		FileInputStream file = new FileInputStream(new File(args[0]));
 		
 		// Get the current workbook
-		HSSFWorkbook workbook = new HSSFWorkbook(file);
-		
-		// Get the first sheet of the workbook
-		HSSFSheet sheet = workbook.getSheetAt(0);
+		HSSFWorkbook workbook = new HSSFWorkbook(file);			
 		
 		// Get the input cells that need to be modified and
 		// store their name and value in the inputCellsMap
@@ -57,9 +54,12 @@ public class ReadExcel {
 			int cellReferenceInputRow = cellReferenceInput.getRow();
 			int cellReferenceInputColumn = cellReferenceInput.getCol();
 
-			Row rowInput = sheet.getRow(cellReferenceInputRow);
+			// Get sheet name for each input cell
+			HSSFSheet inputSheet = workbook.getSheet(inputEntry.getKey().split("!")[0]);
+			
+			Row rowInput = inputSheet.getRow(cellReferenceInputRow);
 			if (rowInput == null)
-			    rowInput = sheet.createRow(cellReferenceInputRow);
+			    rowInput = inputSheet.createRow(cellReferenceInputRow);
 			Cell cellInput = rowInput.getCell(cellReferenceInputColumn, Row.CREATE_NULL_AS_BLANK);				
 			cellInput.setCellValue(Integer.parseInt(inputEntry.getValue()));		
 		}
@@ -73,7 +73,10 @@ public class ReadExcel {
 			int cellReferenceOutputRow = cellReferenceOutput.getRow();
 			int cellReferenceOutputColumn = cellReferenceOutput.getCol();
 			
-			Row rowOutput = sheet.getRow(cellReferenceOutputRow);
+			// Get sheet name for each output cell
+			HSSFSheet outputSheet = workbook.getSheet(outputCells.get(i).split("!")[0]);
+			
+			Row rowOutput = outputSheet.getRow(cellReferenceOutputRow);
 			Cell cellOutput = rowOutput.getCell(cellReferenceOutputColumn, Row.CREATE_NULL_AS_BLANK);
 			
 			// Display results
