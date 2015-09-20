@@ -64,8 +64,8 @@ public class ReadExcel {
 			cellInput.setCellValue(Integer.parseInt(inputEntry.getValue()));		
 		}
 					
-		// Apply all formulas after altering cell values
-		HSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
+		// Apply all formulas after altering cell values		
+		workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
 		
 		// Get the results from the output cells
 		for (int i = 0; i < outputCells.size(); i++) {
@@ -80,7 +80,22 @@ public class ReadExcel {
 			Cell cellOutput = rowOutput.getCell(cellReferenceOutputColumn, Row.CREATE_NULL_AS_BLANK);
 			
 			// Display results
-			System.out.println(cellOutput.getNumericCellValue());						
+			switch (cellOutput.getCellType()) {
+				case Cell.CELL_TYPE_BOOLEAN:
+					System.out.println(cellOutput.getBooleanCellValue());
+					break;
+				case Cell.CELL_TYPE_NUMERIC:
+					System.out.println(cellOutput.getNumericCellValue());
+					break;
+				case Cell.CELL_TYPE_STRING:
+					System.out.println(cellOutput.getStringCellValue());
+					break;
+				case Cell.CELL_TYPE_BLANK:
+					break;				
+				case Cell.CELL_TYPE_FORMULA:					
+					System.out.println(cellOutput.getNumericCellValue());
+					break;
+			}							
 		}			
 						
 		workbook.close();		
