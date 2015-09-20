@@ -12,11 +12,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.ss.formula.eval.ErrorEval;
 import org.apache.poi.ss.usermodel.*;
 
 public class ReadExcel {
@@ -65,7 +67,7 @@ public class ReadExcel {
 		}
 					
 		// Apply all formulas after altering cell values		
-		workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
+		workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();		
 		
 		// Get the results from the output cells
 		for (int i = 0; i < outputCells.size(); i++) {
@@ -92,8 +94,33 @@ public class ReadExcel {
 					break;
 				case Cell.CELL_TYPE_BLANK:
 					break;				
-				case Cell.CELL_TYPE_FORMULA:					
-					System.out.println(cellOutput.getNumericCellValue());
+				case Cell.CELL_TYPE_FORMULA:							
+					switch (cellOutput.getCachedFormulaResultType()) {
+						case Cell.CELL_TYPE_STRING:
+							System.out.println(cellOutput.getRichStringCellValue());							
+							break;
+						case Cell.CELL_TYPE_NUMERIC:
+							HSSFCellStyle style = (HSSFCellStyle) cellOutput.getCellStyle();
+							if (style == null) {
+								System.out.println(cellOutput.getNumericCellValue());
+							} else {
+								DataFormatter formatter = new DataFormatter();
+								System.out.println(formatter.
+										formatRawCellContents(
+												cellOutput.getNumericCellValue(), 
+												style.getDataFormat(),
+												style.getDataFormatString())
+										);
+							}
+							break;
+						case HSSFCell.CELL_TYPE_BOOLEAN:
+							System.out.println(cellOutput.getBooleanCellValue());
+							break;
+						case HSSFCell.CELL_TYPE_ERROR:
+							System.out.println(ErrorEval.getText(cellOutput.getErrorCellValue()));							
+							break;
+					}
+										
 					break;
 			}							
 		}			
